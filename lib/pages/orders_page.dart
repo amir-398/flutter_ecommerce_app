@@ -23,10 +23,8 @@ class _OrdersPageState extends State<OrdersPage> {
   }
 
   void _initializeOrders() {
-    // Utiliser le stream Firestore pour les mises à jour en temps réel
     _ordersStream = OrderService.getOrdersStream();
 
-    // Charger les commandes initiales
     _loadOrders();
   }
 
@@ -38,11 +36,10 @@ class _OrdersPageState extends State<OrdersPage> {
     try {
       final orders = await OrderService.getOrders();
 
-      // Debug: afficher les détails des commandes
       await OrderService.debugOrders();
 
       setState(() {
-        _orders = orders; // Firestore retourne déjà les commandes triées
+        _orders = orders;
         _isLoading = false;
       });
     } catch (e) {
@@ -276,7 +273,6 @@ class _OrdersPageState extends State<OrdersPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // En-tête de la commande
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -322,16 +318,12 @@ class _OrdersPageState extends State<OrdersPage> {
               ),
 
               const SizedBox(height: 16),
-
-              // Résumé des articles
               Text(
                 '${order.totalItems} article${order.totalItems > 1 ? 's' : ''}',
                 style: const TextStyle(color: Colors.white70, fontSize: 14),
               ),
 
               const SizedBox(height: 8),
-
-              // Aperçu des produits
               SizedBox(
                 height: 60,
                 child: ListView.builder(
@@ -375,8 +367,6 @@ class _OrdersPageState extends State<OrdersPage> {
               ],
 
               const SizedBox(height: 16),
-
-              // Actions
               Row(
                 children: [
                   Expanded(
@@ -505,7 +495,6 @@ class _OrdersPageState extends State<OrdersPage> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // En-tête
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: const BoxDecoration(
@@ -547,14 +536,12 @@ class _OrdersPageState extends State<OrdersPage> {
                   ),
                 ),
 
-                // Contenu
                 Flexible(
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.all(20),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Statuts
                         _buildDetailRow('Statut', order.statusDisplayName),
                         _buildDetailRow(
                           'Paiement',
@@ -568,8 +555,6 @@ class _OrdersPageState extends State<OrdersPage> {
                         const SizedBox(height: 16),
                         const Divider(color: Colors.grey),
                         const SizedBox(height: 16),
-
-                        // Informations client
                         const Text(
                           'Informations client',
                           style: TextStyle(
@@ -587,8 +572,6 @@ class _OrdersPageState extends State<OrdersPage> {
                         const SizedBox(height: 16),
                         const Divider(color: Colors.grey),
                         const SizedBox(height: 16),
-
-                        // Articles
                         const Text(
                           'Articles commandés',
                           style: TextStyle(
@@ -603,8 +586,6 @@ class _OrdersPageState extends State<OrdersPage> {
                         const SizedBox(height: 16),
                         const Divider(color: Colors.grey),
                         const SizedBox(height: 16),
-
-                        // Total
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -736,7 +717,6 @@ class _OrdersPageState extends State<OrdersPage> {
   }
 
   void _reorderItems(Order order) {
-    // TODO: Implémenter la fonctionnalité de recommander
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Fonctionnalité de recommander à venir'),

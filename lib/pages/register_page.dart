@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-// 🔥 AJOUT : Import Firebase Auth pour l'inscription
 import 'package:firebase_auth/firebase_auth.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -10,27 +9,21 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
-  // 🔥 AJOUT : Controllers pour les 3 champs (email, password, confirm)
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
-
-  // 🔥 AJOUT : Variables d'état
   bool _isLoading = false;
   String _errorMessage = '';
 
   @override
   void dispose() {
-    // 🔥 AJOUT : Nettoyage des 3 controllers
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
   }
 
-  // 🔥 AJOUT : Fonction principale d'inscription
   Future<void> _register() async {
-    // Validation des champs vides
     if (_emailController.text.trim().isEmpty ||
         _passwordController.text.isEmpty ||
         _confirmPasswordController.text.isEmpty) {
@@ -40,7 +33,6 @@ class _RegisterPageState extends State<RegisterPage> {
       return;
     }
 
-    // 🔥 AJOUT : Validation que les mots de passe correspondent
     if (_passwordController.text != _confirmPasswordController.text) {
       setState(() {
         _errorMessage = 'Les mots de passe ne correspondent pas.';
@@ -48,7 +40,6 @@ class _RegisterPageState extends State<RegisterPage> {
       return;
     }
 
-    // 🔥 AJOUT : Validation de la longueur du mot de passe
     if (_passwordController.text.length < 6) {
       setState(() {
         _errorMessage = 'Le mot de passe doit contenir au moins 6 caractères.';
@@ -62,14 +53,12 @@ class _RegisterPageState extends State<RegisterPage> {
     });
 
     try {
-      // 🔥 CŒUR : Création du compte avec Firebase
       await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text,
       );
 
       if (mounted) {
-        // Message de succès
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text(
@@ -78,11 +67,9 @@ class _RegisterPageState extends State<RegisterPage> {
             backgroundColor: Colors.green,
           ),
         );
-        // 🔥 BONUS : L'utilisateur est automatiquement connecté après inscription
         Navigator.pushReplacementNamed(context, '/');
       }
     } on FirebaseAuthException catch (e) {
-      // Gestion des erreurs Firebase
       setState(() {
         _errorMessage = _getErrorMessage(e.code);
       });
@@ -97,7 +84,6 @@ class _RegisterPageState extends State<RegisterPage> {
     });
   }
 
-  // 🔥 AJOUT : Traduction des erreurs d'inscription
   String _getErrorMessage(String errorCode) {
     switch (errorCode) {
       case 'email-already-in-use':
@@ -122,9 +108,8 @@ class _RegisterPageState extends State<RegisterPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const SizedBox(height: 60), // Plus d'espace en haut sans AppBar
-            
-            // Logo/Icone avec design moderne
+            const SizedBox(height: 60),
+
             Container(
               width: 120,
               height: 120,
@@ -132,12 +117,12 @@ class _RegisterPageState extends State<RegisterPage> {
                 color: const Color(0xFF1A1A1A),
                 borderRadius: BorderRadius.circular(60),
                 border: Border.all(
-                  color: Colors.green.withOpacity(0.3),
+                  color: Colors.green.withValues(alpha: 0.3),
                   width: 2,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.green.withOpacity(0.1),
+                    color: Colors.green.withValues(alpha: 0.1),
                     blurRadius: 20,
                     spreadRadius: 5,
                   ),
@@ -149,10 +134,8 @@ class _RegisterPageState extends State<RegisterPage> {
                 color: Colors.green,
               ),
             ),
-            
+
             const SizedBox(height: 40),
-            
-            // Titre
             const Text(
               'Créer un compte',
               style: TextStyle(
@@ -164,20 +147,15 @@ class _RegisterPageState extends State<RegisterPage> {
             const SizedBox(height: 8),
             const Text(
               'Rejoignez-nous dès aujourd\'hui',
-              style: TextStyle(
-                color: Colors.white70,
-                fontSize: 16,
-              ),
+              style: TextStyle(color: Colors.white70, fontSize: 16),
             ),
             const SizedBox(height: 40),
-
-            // Champ email avec design sombre
             Container(
               decoration: BoxDecoration(
                 color: const Color(0xFF1A1A1A),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: Colors.white.withOpacity(0.1),
+                  color: Colors.white.withValues(alpha: 0.1),
                   width: 1,
                 ),
               ),
@@ -189,7 +167,10 @@ class _RegisterPageState extends State<RegisterPage> {
                   labelStyle: TextStyle(color: Colors.white70),
                   prefixIcon: Icon(Icons.email, color: Colors.white70),
                   border: InputBorder.none,
-                  contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 16,
+                  ),
                 ),
                 keyboardType: TextInputType.emailAddress,
                 enabled: !_isLoading,
@@ -197,13 +178,12 @@ class _RegisterPageState extends State<RegisterPage> {
             ),
             const SizedBox(height: 20),
 
-            // Champ mot de passe avec design sombre
             Container(
               decoration: BoxDecoration(
                 color: const Color(0xFF1A1A1A),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: Colors.white.withOpacity(0.1),
+                  color: Colors.white.withValues(alpha: 0.1),
                   width: 1,
                 ),
               ),
@@ -215,36 +195,33 @@ class _RegisterPageState extends State<RegisterPage> {
                   labelStyle: TextStyle(color: Colors.white70),
                   prefixIcon: Icon(Icons.lock, color: Colors.white70),
                   border: InputBorder.none,
-                  contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 16,
+                  ),
                 ),
                 obscureText: true,
                 enabled: !_isLoading,
               ),
             ),
             const SizedBox(height: 6),
-            // Texte d'aide séparé pour un meilleur contrôle
             const Align(
               alignment: Alignment.centerLeft,
               child: Padding(
                 padding: EdgeInsets.only(left: 16),
                 child: Text(
                   'Au moins 6 caractères',
-                  style: TextStyle(
-                    color: Colors.white60,
-                    fontSize: 12,
-                  ),
+                  style: TextStyle(color: Colors.white60, fontSize: 12),
                 ),
               ),
             ),
             const SizedBox(height: 16),
-
-            // Champ de confirmation du mot de passe avec design sombre
             Container(
               decoration: BoxDecoration(
                 color: const Color(0xFF1A1A1A),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: Colors.white.withOpacity(0.1),
+                  color: Colors.white.withValues(alpha: 0.1),
                   width: 1,
                 ),
               ),
@@ -256,7 +233,10 @@ class _RegisterPageState extends State<RegisterPage> {
                   labelStyle: TextStyle(color: Colors.white70),
                   prefixIcon: Icon(Icons.lock_outline, color: Colors.white70),
                   border: InputBorder.none,
-                  contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 16,
+                  ),
                 ),
                 obscureText: true,
                 enabled: !_isLoading,
@@ -264,23 +244,25 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
             ),
             const SizedBox(height: 24),
-
-            // Affichage des messages d'erreur avec design sombre
             if (_errorMessage.isNotEmpty)
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.red.withOpacity(0.1),
+                  color: Colors.red.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: Colors.red.withOpacity(0.3),
+                    color: Colors.red.withValues(alpha: 0.3),
                     width: 1,
                   ),
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.error_outline, color: Colors.red, size: 20),
+                    const Icon(
+                      Icons.error_outline,
+                      color: Colors.red,
+                      size: 20,
+                    ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
@@ -294,8 +276,6 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
 
             if (_errorMessage.isNotEmpty) const SizedBox(height: 24),
-
-            // Bouton d'inscription avec design moderne
             SizedBox(
               width: double.infinity,
               height: 56,
@@ -328,8 +308,6 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
             ),
             const SizedBox(height: 24),
-
-            // Lien vers la connexion avec design moderne
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -342,7 +320,10 @@ class _RegisterPageState extends State<RegisterPage> {
                       ? null
                       : () => Navigator.pushReplacementNamed(context, '/login'),
                   style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                   ),
                   child: const Text(
                     'Se connecter',
@@ -354,7 +335,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 40),
           ],
         ),

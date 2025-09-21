@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-// 🔥 AJOUT : Import Firebase Auth pour la connexion
 import 'package:firebase_auth/firebase_auth.dart';
 
 class LoginPage extends StatefulWidget {
@@ -10,25 +9,20 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  // 🔥 AJOUT : Controllers pour gérer les champs de texte
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
-  // 🔥 AJOUT : Variables pour gérer l'état de la page
-  bool _isLoading = false; // Indique si une connexion est en cours
-  String _errorMessage = ''; // Stocke les messages d'erreur
+  bool _isLoading = false;
+  String _errorMessage = '';
 
   @override
   void dispose() {
-    // 🔥 AJOUT : Nettoie les controllers pour éviter les fuites mémoire
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
 
-  // 🔥 AJOUT : Fonction principale de connexion
   Future<void> _signIn() async {
-    // Validation basique des champs
     if (_emailController.text.trim().isEmpty ||
         _passwordController.text.isEmpty) {
       setState(() {
@@ -37,51 +31,41 @@ class _LoginPageState extends State<LoginPage> {
       return;
     }
 
-    // Active l'état de chargement
     setState(() {
       _isLoading = true;
       _errorMessage = '';
     });
 
     try {
-      // 🔥 CŒUR : Tentative de connexion avec Firebase
       await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text,
       );
 
-      // Si la connexion réussit et que le widget est toujours monté
       if (mounted) {
-        // Affiche un message de succès
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Connexion réussie !'),
             backgroundColor: Colors.green,
           ),
         );
-        // Redirige vers l'accueil
         Navigator.pushReplacementNamed(context, '/');
       }
     } on FirebaseAuthException catch (e) {
-      // 🔥 AJOUT : Gestion des erreurs spécifiques Firebase
       setState(() {
         _errorMessage = _getErrorMessage(e.code);
       });
     } catch (e) {
-      // Gestion des autres erreurs
       setState(() {
         _errorMessage = 'Une erreur inattendue s\'est produite';
       });
     }
 
-    // Désactive l'état de chargement
     setState(() {
       _isLoading = false;
     });
   }
 
-  // 🔥 AJOUT : Fonction qui traduit les codes d'erreur Firebase en français
-  // Liste des erreurs ici : https://firebase.google.com/docs/auth/admin/errors?hl=fr
   String _getErrorMessage(String errorCode) {
     switch (errorCode) {
       case 'user-not-found':
@@ -108,9 +92,8 @@ class _LoginPageState extends State<LoginPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const SizedBox(height: 60), // Plus d'espace en haut sans AppBar
+            const SizedBox(height: 60),
             
-            // Logo/Icone avec design moderne
             Container(
               width: 120,
               height: 120,
@@ -137,8 +120,6 @@ class _LoginPageState extends State<LoginPage> {
             ),
             
             const SizedBox(height: 40),
-            
-            // Titre
             const Text(
               'Bienvenue',
               style: TextStyle(
@@ -156,8 +137,6 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
             const SizedBox(height: 40),
-
-            // Champ email avec design sombre
             Container(
               decoration: BoxDecoration(
                 color: const Color(0xFF1A1A1A),
@@ -182,8 +161,6 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
             const SizedBox(height: 20),
-
-            // Champ mot de passe avec design sombre
             Container(
               decoration: BoxDecoration(
                 color: const Color(0xFF1A1A1A),
@@ -209,8 +186,6 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
             const SizedBox(height: 24),
-
-            // Affichage des messages d'erreur avec design sombre
             if (_errorMessage.isNotEmpty)
               Container(
                 width: double.infinity,
@@ -239,8 +214,6 @@ class _LoginPageState extends State<LoginPage> {
               ),
 
             if (_errorMessage.isNotEmpty) const SizedBox(height: 24),
-
-            // Bouton de connexion avec design moderne
             SizedBox(
               width: double.infinity,
               height: 56,
@@ -273,8 +246,6 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
             const SizedBox(height: 24),
-
-            // Lien vers l'inscription avec design moderne
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [

@@ -7,10 +7,7 @@ class FirestoreCartService {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   static const String _cartsCollection = 'carts';
 
-  // Obtenir l'ID de l'utilisateur actuel
   static String? get _currentUserId => FirebaseAuth.instance.currentUser?.uid;
-
-  // Créer ou mettre à jour le panier de l'utilisateur
   static Future<void> saveCart(List<CartItem> items) async {
     final userId = _currentUserId;
     if (userId == null) {
@@ -38,7 +35,6 @@ class FirestoreCartService {
     }
   }
 
-  // Récupérer le panier de l'utilisateur
   static Future<List<CartItem>> getCart() async {
     final userId = _currentUserId;
     if (userId == null) {
@@ -76,7 +72,6 @@ class FirestoreCartService {
     }
   }
 
-  // Stream du panier de l'utilisateur (pour les mises à jour en temps réel)
   static Stream<List<CartItem>> getCartStream() {
     final userId = _currentUserId;
     if (userId == null) {
@@ -97,7 +92,6 @@ class FirestoreCartService {
     });
   }
 
-  // Vider le panier de l'utilisateur
   static Future<void> clearCart() async {
     final userId = _currentUserId;
     if (userId == null) {
@@ -114,7 +108,6 @@ class FirestoreCartService {
     }
   }
 
-  // Ajouter un produit au panier
   static Future<void> addToCart(Product product, {int quantity = 1}) async {
     final currentItems = await getCart();
 
@@ -124,7 +117,6 @@ class FirestoreCartService {
 
     List<CartItem> updatedItems;
     if (existingItemIndex >= 0) {
-      // Le produit existe déjà, augmenter la quantité
       updatedItems = List.from(currentItems);
       updatedItems[existingItemIndex] = updatedItems[existingItemIndex]
           .copyWith(
@@ -132,7 +124,6 @@ class FirestoreCartService {
             product: product,
           );
     } else {
-      // Nouveau produit
       updatedItems = [
         ...currentItems,
         CartItem(productId: product.id, quantity: quantity, product: product),
@@ -142,7 +133,6 @@ class FirestoreCartService {
     await saveCart(updatedItems);
   }
 
-  // Supprimer un produit du panier
   static Future<void> removeFromCart(int productId) async {
     final currentItems = await getCart();
     final updatedItems = currentItems
@@ -151,7 +141,6 @@ class FirestoreCartService {
     await saveCart(updatedItems);
   }
 
-  // Mettre à jour la quantité d'un produit
   static Future<void> updateQuantity(int productId, int quantity) async {
     if (quantity <= 0) {
       await removeFromCart(productId);
@@ -172,13 +161,11 @@ class FirestoreCartService {
     }
   }
 
-  // Obtenir le nombre total d'articles dans le panier
   static Future<int> getItemCount() async {
     final items = await getCart();
     return items.fold<int>(0, (sum, item) => sum + item.quantity);
   }
 
-  // Obtenir le total du panier
   static Future<double> getTotal() async {
     final items = await getCart();
     return items.fold<double>(0.0, (sum, item) => sum + item.total);

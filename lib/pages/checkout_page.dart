@@ -34,7 +34,6 @@ class _CheckoutPageState extends State<CheckoutPage> {
   }
 
   void _prefillForm() {
-    // Préremplir les champs avec des données d'exemple
     _nameController.text = 'Jean Dupont';
     _emailController.text = 'jean.dupont@example.com';
     _phoneController.text = '+33 6 12 34 56 78';
@@ -59,10 +58,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
   @override
   Widget build(BuildContext context) {
-    // 🔥 GUARD D'AUTHENTIFICATION : Vérifier si l'utilisateur est connecté
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
-      // Rediriger vers la page de login si non connecté
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Navigator.pushNamedAndRemoveUntil(
           context,
@@ -672,7 +669,6 @@ class _CheckoutPageState extends State<CheckoutPage> {
     });
 
     try {
-      // Créer la commande
       final order = await OrderService.createOrder(
         items: cart.items,
         total: cart.total,
@@ -686,7 +682,6 @@ class _CheckoutPageState extends State<CheckoutPage> {
             : _notesController.text.trim(),
       );
 
-      // Traiter le paiement
       PaymentResult paymentResult;
       if (_selectedPaymentMethod == 'card') {
         paymentResult = await OrderService.processPayment(
@@ -698,7 +693,6 @@ class _CheckoutPageState extends State<CheckoutPage> {
           cvv: _cvvController.text.trim(),
         );
       } else {
-        // Mock pour PayPal
         await Future.delayed(const Duration(seconds: 2));
         paymentResult = PaymentResult(
           success: true,
@@ -714,10 +708,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
       });
 
       if (paymentResult.success) {
-        // Vider le panier
         cart.clearCart();
 
-        // Afficher le succès
         _showSuccessDialog(order, paymentResult);
       } else {
         _showErrorDialog(paymentResult.message);

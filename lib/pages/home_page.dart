@@ -70,7 +70,6 @@ class _MyHomePageState extends State<MyHomePage> {
       });
 
       final productsData = await ApiService.getProducts();
-      // Prendre les 6 premiers produits comme produits populaires
       setState(() {
         featuredProducts = productsData.take(6).toList();
         isLoadingProducts = false;
@@ -113,7 +112,6 @@ class _MyHomePageState extends State<MyHomePage> {
                         color: Colors.white,
                       ),
                       onPressed: () {
-                        // Navigation vers le panier via la bottom nav
                         _navigateToCart();
                       },
                     ),
@@ -219,7 +217,6 @@ class _MyHomePageState extends State<MyHomePage> {
             const SizedBox(height: 24),
             ElevatedButton(
               onPressed: () {
-                // Navigation vers le catalogue via la bottom nav
                 _navigateToCatalog();
               },
               style: ElevatedButton.styleFrom(
@@ -303,7 +300,6 @@ class _MyHomePageState extends State<MyHomePage> {
       );
     }
 
-    // Si pas de catégories, afficher des catégories par défaut
     final categoriesToShow = categories.isEmpty
         ? _getDefaultCategories()
         : categories;
@@ -318,7 +314,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
         return GestureDetector(
           onTap: () {
-            // Navigation vers le catalogue avec catégorie sélectionnée
             _navigateToCatalogWithCategory(category);
           },
           child: Container(
@@ -503,7 +498,6 @@ class _MyHomePageState extends State<MyHomePage> {
         final product = featuredProducts[index];
         return GestureDetector(
           onTap: () {
-            // Navigation vers la page produit
             Navigator.pushNamed(
               context,
               '/product',

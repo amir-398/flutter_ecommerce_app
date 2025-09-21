@@ -5,14 +5,13 @@ import '../models/cart.dart';
 class CartService {
   static const String baseUrl = 'https://fakestoreapi.com';
 
-  // Créer un nouveau panier
   static Future<Cart> createCart(List<CartItem> items) async {
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/carts'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
-          'userId': 1, // Utilisateur par défaut
+          'userId': 1,
           'date': DateTime.now().toIso8601String(),
           'products': items.map((item) => item.toJson()).toList(),
         }),
@@ -29,7 +28,6 @@ class CartService {
     }
   }
 
-  // Récupérer un panier par ID
   static Future<Cart> getCart(int cartId) async {
     try {
       final response = await http.get(
@@ -48,7 +46,6 @@ class CartService {
     }
   }
 
-  // Mettre à jour un panier
   static Future<Cart> updateCart(int cartId, List<CartItem> items) async {
     try {
       final response = await http.put(
@@ -72,7 +69,6 @@ class CartService {
     }
   }
 
-  // Supprimer un panier
   static Future<void> deleteCart(int cartId) async {
     try {
       final response = await http.delete(
@@ -88,7 +84,6 @@ class CartService {
     }
   }
 
-  // Récupérer tous les paniers d'un utilisateur
   static Future<List<Cart>> getUserCarts(int userId) async {
     try {
       final response = await http.get(

@@ -39,20 +39,17 @@ class AuthWrapper extends StatelessWidget {
           );
         }
 
-        // 🔥 GUARD D'AUTHENTIFICATION : Rediriger vers login si non authentifié
         if (snapshot.data == null) {
-          // Utilisateur non connecté, rediriger vers la page de login
           WidgetsBinding.instance.addPostFrameCallback((_) {
             Navigator.pushNamedAndRemoveUntil(
               context,
               '/login',
-              (route) => false, // Supprime toutes les routes précédentes
+              (route) => false,
             );
           });
           return const LoginPage();
         }
 
-        // Initialiser le panier quand l'état d'authentification change
         WidgetsBinding.instance.addPostFrameCallback((_) {
           final cartProvider = Provider.of<CartProvider>(
             context,
@@ -81,7 +78,6 @@ class MyApp extends StatelessWidget {
         brightness: Brightness.dark,
       ),
       home: const MainNavigationPage(),
-      // Routes pour les pages qui ne sont pas dans la bottom nav
       routes: {
         '/product': (context) {
           final args =

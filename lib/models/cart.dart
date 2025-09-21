@@ -52,7 +52,6 @@ class CartItem {
   factory CartItem.fromJson(Map<String, dynamic> json) {
     Product? product;
 
-    // Si les détails du produit sont présents dans le JSON
     if (json['product'] != null) {
       product = Product.fromJson(json['product']);
     }
@@ -72,7 +71,6 @@ class CartItem {
     };
   }
 
-  // Méthodes pour Firestore
   Map<String, dynamic> toFirestoreMap() {
     return {
       'productId': productId,
@@ -84,7 +82,6 @@ class CartItem {
   factory CartItem.fromFirestoreMap(Map<String, dynamic> data) {
     Product? product;
 
-    // Si les détails du produit sont présents dans les données Firestore
     if (data['product'] != null) {
       product = Product.fromJson(data['product']);
     }

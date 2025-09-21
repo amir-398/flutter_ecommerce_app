@@ -19,7 +19,6 @@ class Product {
 
   factory Product.fromJson(Map<String, dynamic> json) {
     try {
-      // Gérer les images - DummyJSON a 'images' (array) et 'thumbnail'
       String imageUrl = 'https://via.placeholder.com/300x300?text=No+Image';
       if (json['thumbnail'] != null) {
         imageUrl = json['thumbnail'].toString();
@@ -52,17 +51,14 @@ class Product {
       return Rating(rate: 0.0, count: 0);
     }
 
-    // Si c'est un nombre (double), c'est le format DummyJSON
     if (ratingData is num) {
       return Rating(rate: ratingData.toDouble(), count: 0);
     }
 
-    // Si c'est un objet Map, c'est le format FakeStore
     if (ratingData is Map<String, dynamic>) {
       return Rating.fromJson(ratingData);
     }
 
-    // Fallback
     return Rating(rate: 0.0, count: 0);
   }
 

@@ -45,7 +45,6 @@ class _CatalogPageState extends State<CatalogPage> {
 
       final categoriesData = await ApiService.getCategories();
 
-      // Charger les produits selon la catégorie sélectionnée ou la recherche
       List<Product> productsData;
       if (_isSearching && _searchQuery.isNotEmpty) {
         productsData = await ApiService.searchProducts(_searchQuery);
@@ -162,7 +161,6 @@ class _CatalogPageState extends State<CatalogPage> {
       ),
       body: Column(
         children: [
-          // Afficher les catégories seulement si on n'est pas en mode recherche
           if (!_isSearching)
             Container(
               height: 60,
@@ -204,7 +202,6 @@ class _CatalogPageState extends State<CatalogPage> {
               ),
             ),
 
-          // Afficher un indicateur de recherche si on est en mode recherche
           if (_isSearching)
             Container(
               padding: const EdgeInsets.all(16),

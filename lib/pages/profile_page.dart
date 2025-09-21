@@ -19,7 +19,6 @@ class ProfilePage extends StatelessWidget {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            // Avatar et informations utilisateur
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(24),
@@ -58,8 +57,6 @@ class ProfilePage extends StatelessWidget {
             ),
 
             const SizedBox(height: 24),
-
-            // Options du profil
             _buildProfileOption(
               icon: Icons.person_outline,
               title: 'Informations personnelles',
@@ -92,8 +89,6 @@ class ProfilePage extends StatelessWidget {
             ),
 
             const Spacer(),
-
-            // Bouton de déconnexion
             Container(
               width: double.infinity,
               height: 50,
@@ -152,7 +147,7 @@ class ProfilePage extends StatelessWidget {
             ),
             ElevatedButton(
               onPressed: () {
-                Navigator.of(context).pop(); // Fermer le dialog
+                Navigator.of(context).pop();
                 _performLogout(context);
               },
               style: ElevatedButton.styleFrom(
@@ -169,10 +164,7 @@ class ProfilePage extends StatelessWidget {
 
   Future<void> _performLogout(BuildContext context) async {
     try {
-      // Déconnexion avec Firebase Auth
       await FirebaseAuth.instance.signOut();
-
-      // Afficher un message de confirmation
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -182,15 +174,9 @@ class ProfilePage extends StatelessWidget {
           ),
         );
 
-        // Rediriger vers la page de connexion/inscription
-        Navigator.pushNamedAndRemoveUntil(
-          context,
-          '/login',
-          (route) => false, // Supprime toutes les routes précédentes
-        );
+        Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
       }
     } catch (e) {
-      // Gérer les erreurs de déconnexion
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

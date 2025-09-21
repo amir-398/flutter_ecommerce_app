@@ -8,10 +8,7 @@ class FirestoreOrderService {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   static const String _ordersCollection = 'orders';
 
-  // Obtenir l'ID de l'utilisateur actuel
   static String? get _currentUserId => FirebaseAuth.instance.currentUser?.uid;
-
-  // Créer une nouvelle commande
   static Future<order_model.Order> createOrder({
     required List<CartItem> items,
     required double total,
@@ -27,18 +24,14 @@ class FirestoreOrderService {
       throw Exception('Utilisateur non connecté');
     }
     try {
-      // Générer un ID unique pour la commande
       final orderId = _firestore.collection(_ordersCollection).doc().id;
 
-      // Créer une copie des items avec les détails complets du produit
       final orderItems = <CartItem>[];
 
       for (final item in items) {
         if (item.product != null) {
-          // Le produit est déjà présent
           orderItems.add(item);
         } else {
-          // Créer un produit temporaire (en production, récupérer depuis l'API)
           orderItems.add(
             CartItem(
               productId: item.productId,
@@ -73,7 +66,6 @@ class FirestoreOrderService {
         notes: notes,
       );
 
-      // Sauvegarder dans Firestore avec l'userId
       final orderData = order.toFirestoreMap();
       orderData['userId'] = userId;
 
@@ -88,7 +80,6 @@ class FirestoreOrderService {
     }
   }
 
-  // Récupérer les commandes de l'utilisateur connecté
   static Future<List<order_model.Order>> getOrders() async {
     final userId = _currentUserId;
     if (userId == null) {
@@ -117,7 +108,6 @@ class FirestoreOrderService {
     }
   }
 
-  // Récupérer une commande par ID
   static Future<order_model.Order?> getOrderById(String orderId) async {
     try {
       final DocumentSnapshot doc = await _firestore
@@ -136,7 +126,6 @@ class FirestoreOrderService {
     }
   }
 
-  // Mettre à jour le statut d'une commande
   static Future<bool> updateOrderStatus(
     String orderId,
     order_model.OrderStatus status,
@@ -152,7 +141,6 @@ class FirestoreOrderService {
     }
   }
 
-  // Mettre à jour le statut de paiement
   static Future<bool> updatePaymentStatus(
     String orderId,
     order_model.PaymentStatus status,
@@ -168,7 +156,6 @@ class FirestoreOrderService {
     }
   }
 
-  // Écouter les changements de commandes en temps réel
   static Stream<List<order_model.Order>> getOrdersStream() {
     final userId = _currentUserId;
     if (userId == null) {
@@ -187,7 +174,6 @@ class FirestoreOrderService {
         );
   }
 
-  // Supprimer une commande
   static Future<bool> deleteOrder(String orderId) async {
     try {
       await _firestore.collection(_ordersCollection).doc(orderId).delete();
@@ -197,7 +183,6 @@ class FirestoreOrderService {
     }
   }
 
-  // Supprimer toutes les commandes (pour les tests)
   static Future<void> clearAllOrders() async {
     try {
       final QuerySnapshot snapshot = await _firestore
@@ -214,7 +199,6 @@ class FirestoreOrderService {
     }
   }
 
-  // Mettre à jour les détails d'un produit dans une commande
   static Future<void> updateProductDetailsInOrder(
     String orderId,
     int productId,

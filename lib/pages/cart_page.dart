@@ -10,10 +10,8 @@ class CartPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 🔥 GUARD D'AUTHENTIFICATION : Vérifier si l'utilisateur est connecté
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
-      // Rediriger vers la page de login si non connecté
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
       });
@@ -119,7 +117,6 @@ class CartPage extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            // Image du produit
             Container(
               width: 80,
               height: 80,
@@ -154,8 +151,6 @@ class CartPage extends StatelessWidget {
             ),
 
             const SizedBox(width: 16),
-
-            // Informations du produit
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -183,11 +178,8 @@ class CartPage extends StatelessWidget {
                   ),
 
                   const SizedBox(height: 8),
-
-                  // Contrôles de quantité
                   Row(
                     children: [
-                      // Bouton diminuer
                       GestureDetector(
                         onTap: () {
                           final cart = Provider.of<CartProvider>(
@@ -216,7 +208,6 @@ class CartPage extends StatelessWidget {
 
                       const SizedBox(width: 12),
 
-                      // Quantité
                       Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 12,
@@ -238,7 +229,6 @@ class CartPage extends StatelessWidget {
 
                       const SizedBox(width: 12),
 
-                      // Bouton augmenter
                       GestureDetector(
                         onTap: () {
                           final cart = Provider.of<CartProvider>(
@@ -270,7 +260,6 @@ class CartPage extends StatelessWidget {
               ),
             ),
 
-            // Total et bouton supprimer
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
@@ -323,7 +312,6 @@ class CartPage extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // Résumé
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -343,8 +331,6 @@ class CartPage extends StatelessWidget {
           ),
 
           const SizedBox(height: 16),
-
-          // Bouton commander
           SizedBox(
             width: double.infinity,
             height: 56,

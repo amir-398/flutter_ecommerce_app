@@ -91,7 +91,6 @@ class Order {
     };
   }
 
-  // Méthodes pour Firestore
   Map<String, dynamic> toFirestoreMap() {
     return {
       'id': id,

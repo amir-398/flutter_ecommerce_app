@@ -15,7 +15,6 @@ class CartProvider with ChangeNotifier {
   bool get isEmpty => _items.isEmpty;
   bool get isLoading => _isLoading;
 
-  // Initialiser le panier pour l'utilisateur connecté
   Future<void> initializeCart() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null && user.uid != _currentUserId) {
@@ -28,7 +27,6 @@ class CartProvider with ChangeNotifier {
     }
   }
 
-  // Charger le panier depuis Firestore
   Future<void> _loadCart() async {
     if (_currentUserId == null) return;
 
@@ -46,7 +44,6 @@ class CartProvider with ChangeNotifier {
     }
   }
 
-  // Ajouter un produit au panier
   Future<void> addToCart(Product product, {int quantity = 1}) async {
     if (_currentUserId == null) {
       print(
@@ -57,13 +54,12 @@ class CartProvider with ChangeNotifier {
 
     try {
       await FirestoreCartService.addToCart(product, quantity: quantity);
-      await _loadCart(); // Recharger le panier depuis Firestore
+      await _loadCart();
     } catch (e) {
       print('❌ CART PROVIDER: Erreur lors de l\'ajout au panier: $e');
     }
   }
 
-  // Supprimer un produit du panier
   Future<void> removeFromCart(int productId) async {
     if (_currentUserId == null) {
       print(
@@ -74,13 +70,12 @@ class CartProvider with ChangeNotifier {
 
     try {
       await FirestoreCartService.removeFromCart(productId);
-      await _loadCart(); // Recharger le panier depuis Firestore
+      await _loadCart();
     } catch (e) {
       print('❌ CART PROVIDER: Erreur lors de la suppression du panier: $e');
     }
   }
 
-  // Mettre à jour la quantité d'un produit
   Future<void> updateQuantity(int productId, int quantity) async {
     if (_currentUserId == null) {
       print(
@@ -91,7 +86,7 @@ class CartProvider with ChangeNotifier {
 
     try {
       await FirestoreCartService.updateQuantity(productId, quantity);
-      await _loadCart(); // Recharger le panier depuis Firestore
+      await _loadCart();
     } catch (e) {
       print('❌ CART PROVIDER: Erreur lors de la mise à jour du panier: $e');
     }
@@ -133,7 +128,6 @@ class CartProvider with ChangeNotifier {
 
   Future<void> syncWithAPI() async {
     try {
-      // En mode debug, on simule juste la synchronisation
       if (kDebugMode) {
         print('Synchronisation du panier avec l\'API...');
         print('Nombre d\'articles: ${_items.length}');

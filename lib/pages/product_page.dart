@@ -240,7 +240,6 @@ class _ProductPageState extends State<ProductPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Catégorie
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
@@ -258,8 +257,6 @@ class _ProductPageState extends State<ProductPage> {
           ),
 
           const SizedBox(height: 12),
-
-          // Titre
           Text(
             product!.title,
             style: const TextStyle(
@@ -270,8 +267,6 @@ class _ProductPageState extends State<ProductPage> {
           ),
 
           const SizedBox(height: 8),
-
-          // Prix
           Row(
             children: [
               Text(
@@ -367,7 +362,6 @@ class _ProductPageState extends State<ProductPage> {
             ),
             child: Row(
               children: [
-                // Étoiles
                 Row(
                   children: List.generate(5, (index) {
                     return Icon(
@@ -383,8 +377,6 @@ class _ProductPageState extends State<ProductPage> {
                 ),
 
                 const SizedBox(width: 12),
-
-                // Note et nombre d'avis
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -407,8 +399,6 @@ class _ProductPageState extends State<ProductPage> {
                 ),
 
                 const Spacer(),
-
-                // Bouton pour voir tous les avis
                 TextButton(
                   onPressed: () {
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -436,7 +426,6 @@ class _ProductPageState extends State<ProductPage> {
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
-          // Bouton principal - Ajouter au panier
           Consumer<CartProvider>(
             builder: (context, cart, child) {
               final isInCart = cart.isInCart(product!.id);
@@ -497,8 +486,6 @@ class _ProductPageState extends State<ProductPage> {
           ),
 
           const SizedBox(height: 12),
-
-          // Bouton secondaire - Acheter maintenant
           Consumer<CartProvider>(
             builder: (context, cart, child) {
               return SizedBox(
@@ -506,10 +493,8 @@ class _ProductPageState extends State<ProductPage> {
                 height: 56,
                 child: OutlinedButton(
                   onPressed: () {
-                    // Ajouter le produit au panier
                     cart.addToCart(product!);
 
-                    // Rediriger vers la page de checkout
                     Navigator.pushNamed(context, '/checkout');
                   },
                   style: OutlinedButton.styleFrom(
