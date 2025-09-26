@@ -93,7 +93,7 @@ class _LoginPageState extends State<LoginPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const SizedBox(height: 60),
-            
+
             Container(
               width: 120,
               height: 120,
@@ -118,7 +118,7 @@ class _LoginPageState extends State<LoginPage> {
                 color: Colors.blue,
               ),
             ),
-            
+
             const SizedBox(height: 40),
             const Text(
               'Bienvenue',
@@ -131,10 +131,7 @@ class _LoginPageState extends State<LoginPage> {
             const SizedBox(height: 8),
             const Text(
               'Connectez-vous à votre compte',
-              style: TextStyle(
-                color: Colors.white70,
-                fontSize: 16,
-              ),
+              style: TextStyle(color: Colors.white70, fontSize: 16),
             ),
             const SizedBox(height: 40),
             Container(
@@ -154,7 +151,10 @@ class _LoginPageState extends State<LoginPage> {
                   labelStyle: TextStyle(color: Colors.white70),
                   prefixIcon: Icon(Icons.email, color: Colors.white70),
                   border: InputBorder.none,
-                  contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 16,
+                  ),
                 ),
                 keyboardType: TextInputType.emailAddress,
                 enabled: !_isLoading,
@@ -178,7 +178,10 @@ class _LoginPageState extends State<LoginPage> {
                   labelStyle: TextStyle(color: Colors.white70),
                   prefixIcon: Icon(Icons.lock, color: Colors.white70),
                   border: InputBorder.none,
-                  contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 16,
+                  ),
                 ),
                 obscureText: true,
                 enabled: !_isLoading,
@@ -200,7 +203,11 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.error_outline, color: Colors.red, size: 20),
+                    const Icon(
+                      Icons.error_outline,
+                      color: Colors.red,
+                      size: 20,
+                    ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
@@ -256,9 +263,15 @@ class _LoginPageState extends State<LoginPage> {
                 TextButton(
                   onPressed: _isLoading
                       ? null
-                      : () => Navigator.pushReplacementNamed(context, '/register'),
+                      : () => Navigator.pushReplacementNamed(
+                          context,
+                          '/register',
+                        ),
                   style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                   ),
                   child: const Text(
                     'S\'inscrire',
@@ -270,7 +283,7 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 40),
           ],
         ),

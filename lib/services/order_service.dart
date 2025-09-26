@@ -116,8 +116,7 @@ class OrderService {
             item.productId,
             product,
           );
-        } catch (e) {
-        }
+        } catch (e) {}
       }
     }
   }
@@ -136,8 +135,7 @@ class OrderService {
               item.productId,
               product,
             );
-          } catch (e) {
-          }
+          } catch (e) {}
         }
       }
     }

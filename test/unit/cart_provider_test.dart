@@ -77,7 +77,7 @@ void main() {
       // Test initial state
       expect(cartProvider.isEmpty, isTrue);
       expect(cartProvider.isLoading, isFalse);
-      
+
       // Test that the provider can be instantiated without errors
       expect(cartProvider, isA<CartProvider>());
     });

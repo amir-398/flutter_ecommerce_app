@@ -61,7 +61,9 @@ void main() {
     group('getProductsByCategory', () {
       test('should handle category products API response', () async {
         try {
-          final products = await ApiService.getProductsByCategory('electronics');
+          final products = await ApiService.getProductsByCategory(
+            'electronics',
+          );
           expect(products, isA<List<Product>>());
           // Verify that products have the expected structure
           for (final product in products) {
