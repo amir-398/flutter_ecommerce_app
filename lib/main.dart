@@ -20,7 +20,7 @@ void main() async {
   runApp(
     ChangeNotifierProvider(
       create: (context) => CartProvider(),
-      child: const AuthWrapper(),
+      child: const MyApp(),
     ),
   );
 }
@@ -58,7 +58,7 @@ class AuthWrapper extends StatelessWidget {
           cartProvider.initializeCart();
         });
 
-        return const MyApp();
+        return const MainNavigationPage();
       },
     );
   }
@@ -77,7 +77,7 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
         brightness: Brightness.dark,
       ),
-      home: const MainNavigationPage(),
+      home: const AuthWrapper(),
       routes: {
         '/product': (context) {
           final args =
