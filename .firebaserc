@@ -1,5 +1,20 @@
 {
   "projects": {
     "default": "ecommerceapp-7268d"
+  },
+  "targets": {
+    "ecommerceapp-7268d": {
+      "hosting": {
+        "live": [
+          "ecommerceapp-7268d"
+        ],
+        "blue": [
+          "ecommerceapp-7268d"
+        ],
+        "green": [
+          "ecommerceapp-7268d"
+        ]
+      }
+    }
   }
 }

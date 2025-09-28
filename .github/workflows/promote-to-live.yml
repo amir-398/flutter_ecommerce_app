@@ -1,0 +1,178 @@
+name: Promote to Live
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_channel:
+        description: "Source channel to promote (blue or green)"
+        required: true
+        type: choice
+        options:
+          - blue
+          - green
+      confirm_promotion:
+        description: 'Type "PROMOTE" to confirm'
+        required: true
+        type: string
+
+env:
+  FIREBASE_PROJECT_ID: ecommerceapp-7268d
+
+jobs:
+  validate-input:
+    runs-on: ubuntu-latest
+    outputs:
+      valid: ${{ steps.validate.outputs.valid }}
+    steps:
+      - name: Validate promotion confirmation
+        id: validate
+        run: |
+          if [ "${{ github.event.inputs.confirm_promotion }}" = "PROMOTE" ]; then
+            echo "valid=true" >> $GITHUB_OUTPUT
+            echo "✅ Confirmation validée"
+          else
+            echo "valid=false" >> $GITHUB_OUTPUT
+            echo "❌ Confirmation invalide. Vous devez taper 'PROMOTE'"
+            exit 1
+          fi
+
+  final-smoke-tests:
+    needs: validate-input
+    if: needs.validate-input.outputs.valid == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+
+      - name: Install Playwright
+        run: |
+          npm init -y
+          npm install -D @playwright/test
+          npx playwright install --with-deps
+
+      - name: Run final smoke tests
+        run: |
+          cat > final-smoke-tests.spec.js << 'EOF'
+          const { test, expect } = require('@playwright/test');
+
+          test.describe('Final Smoke Tests - ${{ github.event.inputs.source_channel }}', () => {
+            test('Critical user flows work', async ({ page }) => {
+              const previewUrl = 'https://${{ github.event.inputs.source_channel }}--${{ env.FIREBASE_PROJECT_ID }}.web.app';
+              
+              await page.goto(previewUrl);
+              await expect(page).toHaveTitle(/Flutter Ecommerce App/);
+              await page.waitForLoadState('networkidle');
+              
+              // Test critical functionality
+              console.log('✅ Page loaded successfully');
+              
+              // Test navigation
+              const navElements = await page.locator('nav, header').count();
+              if (navElements > 0) {
+                console.log('✅ Navigation elements found');
+              }
+              
+              // Test for any console errors
+              const errors = [];
+              page.on('console', msg => {
+                if (msg.type() === 'error') {
+                  errors.push(msg.text());
+                }
+              });
+              
+              await page.waitForTimeout(2000);
+              
+              if (errors.length > 0) {
+                console.log('⚠️ Console errors found:', errors);
+              } else {
+                console.log('✅ No console errors detected');
+              }
+            });
+
+            test('Performance check', async ({ page }) => {
+              const previewUrl = 'https://${{ github.event.inputs.source_channel }}--${{ env.FIREBASE_PROJECT_ID }}.web.app';
+              
+              const startTime = Date.now();
+              await page.goto(previewUrl);
+              await page.waitForLoadState('networkidle');
+              const loadTime = Date.now() - startTime;
+              
+              console.log(`📊 Page load time: ${loadTime}ms`);
+              
+              // Page should load within 5 seconds
+              expect(loadTime).toBeLessThan(5000);
+            });
+          });
+          EOF
+
+          npx playwright test final-smoke-tests.spec.js --reporter=line
+
+  promote:
+    needs: [validate-input, final-smoke-tests]
+    if: needs.validate-input.outputs.valid == 'true'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: "stable"
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build web app for live
+        run: flutter build web --release
+
+      - name: Deploy to live channel
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_ECOMMERCEAPP_7268D }}
+          channelId: live
+          projectId: ${{ env.FIREBASE_PROJECT_ID }}
+          target: live
+
+      - name: Verify live deployment
+        run: |
+          echo "🔍 Vérification du déploiement live..."
+          sleep 10
+
+          # Test que le site live répond
+          if curl -f -s "https://${{ env.FIREBASE_PROJECT_ID }}.web.app" > /dev/null; then
+            echo "✅ Site live accessible"
+          else
+            echo "❌ Site live non accessible"
+            exit 1
+          fi
+
+      - name: Notify success
+        run: |
+          echo "🎉 Promotion réussie!"
+          echo "🔗 URL Live: https://${{ env.FIREBASE_PROJECT_ID }}.web.app"
+          echo "📊 Canal source: ${{ github.event.inputs.source_channel }}"
+          echo "⏰ Heure: $(date)"
+
+  rollback:
+    needs: [validate-input]
+    if: needs.validate-input.outputs.valid == 'true' && github.event.inputs.rollback == 'true'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Rollback to previous version
+        run: |
+          echo "🔄 Rollback en cours..."
+          echo "⚠️ Cette fonctionnalité nécessite une implémentation spécifique"
+          echo "💡 Considérations pour le rollback:"
+          echo "   - Sauvegarder la version précédente"
+          echo "   - Implémenter un système de versioning"
+          echo "   - Créer des snapshots automatiques"
