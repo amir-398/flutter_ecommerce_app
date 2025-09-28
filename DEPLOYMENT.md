@@ -31,6 +31,7 @@ La stratégie Blue-Green utilise deux canaux Firebase Hosting (`blue` et `green`
 **Déclencheur:** Push sur `main` ou déclenchement manuel
 
 **Étapes:**
+
 1. **Tests** - Exécution des tests unitaires et d'intégration
 2. **Build** - Construction de l'application Flutter
 3. **Déploiement Preview** - Déploiement sur le canal inactif (blue ou green)
@@ -42,6 +43,7 @@ La stratégie Blue-Green utilise deux canaux Firebase Hosting (`blue` et `green`
 **Déclencheur:** Déclenchement manuel uniquement
 
 **Étapes:**
+
 1. **Validation** - Confirmation de la promotion
 2. **Tests finaux** - Smoke tests sur le canal source
 3. **Promotion** - Déploiement sur le canal live
@@ -52,6 +54,7 @@ La stratégie Blue-Green utilise deux canaux Firebase Hosting (`blue` et `green`
 **Déclencheur:** Déclenchement manuel en cas d'urgence
 
 **Étapes:**
+
 1. **Validation d'urgence** - Confirmation de sécurité
 2. **Vérification source** - Vérification de la disponibilité du canal source
 3. **Rollback** - Déploiement immédiat sur live
@@ -62,11 +65,13 @@ La stratégie Blue-Green utilise deux canaux Firebase Hosting (`blue` et `green`
 ### Prérequis
 
 1. **Firebase CLI installé:**
+
    ```bash
    npm install -g firebase-tools
    ```
 
 2. **Connexion Firebase:**
+
    ```bash
    firebase login
    ```
@@ -88,11 +93,13 @@ Exécutez le script de configuration:
 ### Déploiement Automatique
 
 1. **Push sur main:**
+
    ```bash
    git push origin main
    ```
 
 2. **GitHub Actions s'exécute automatiquement:**
+
    - Tests et validation
    - Build de l'application
    - Déploiement sur canal preview (blue ou green)
@@ -115,6 +122,7 @@ Exécutez le script de configuration:
 ### Smoke Tests Automatisés
 
 Les smoke tests vérifient:
+
 - ✅ Chargement de la page
 - ✅ Navigation fonctionnelle
 - ✅ Responsive design
@@ -124,6 +132,7 @@ Les smoke tests vérifient:
 ### Tests Manuels
 
 Avant promotion vers live:
+
 1. Tester l'URL de preview
 2. Vérifier les fonctionnalités critiques
 3. Tester sur différents appareils
@@ -136,6 +145,7 @@ Avant promotion vers live:
 En cas de problème en production:
 
 1. **Déclencher le rollback:**
+
    - Aller dans GitHub Actions > "Emergency Rollback"
    - Sélectionner le canal de rollback (blue ou green)
    - Taper "EMERGENCY_ROLLBACK" pour confirmer
@@ -158,8 +168,10 @@ En cas de problème en production:
 ### URLs de Monitoring
 
 - **Live:** https://ecommerceapp-7268d.web.app
-- **Blue Preview:** https://blue--ecommerceapp-7268d.web.app
-- **Green Preview:** https://green--ecommerceapp-7268d.web.app
+- **Blue Preview:** https://ecommerceapp-7268d--blue-kvsprspl.web.app
+- **Green Preview:** https://ecommerceapp-7268d--green-mg6s1mfo.web.app
+
+> **Note:** Les URLs des canaux preview changent à chaque déploiement. Utilisez `firebase hosting:channel:list` ou `./scripts/show-channel-urls.sh` pour obtenir les URLs actuelles.
 
 ### Métriques Clés
 
@@ -192,6 +204,7 @@ En cas de problème en production:
 ## 🆘 Support
 
 En cas de problème:
+
 1. Vérifier les logs GitHub Actions
 2. Consulter la documentation Firebase
 3. Contacter l'équipe de développement

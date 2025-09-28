@@ -8,8 +8,8 @@ export FIREBASE_PROJECT_NAME="Flutter Ecommerce App"
 
 # URLs des canaux
 export LIVE_URL="https://ecommerceapp-7268d.web.app"
-export BLUE_PREVIEW_URL="https://blue--ecommerceapp-7268d.web.app"
-export GREEN_PREVIEW_URL="https://green--ecommerceapp-7268d.web.app"
+export BLUE_PREVIEW_URL="https://ecommerceapp-7268d--blue-kvsprspl.web.app"
+export GREEN_PREVIEW_URL="https://ecommerceapp-7268d--green-mg6s1mfo.web.app"
 
 # Configuration des tests
 export ENABLE_SMOKE_TESTS=true
