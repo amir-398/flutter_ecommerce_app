@@ -46,10 +46,20 @@ jobs:
       - name: Check source channel availability
         id: check
         run: |
+          # Installer Firebase CLI
+          npm install -g firebase-tools
+          
+          # Configurer l'authentification Firebase
+          echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_ECOMMERCEAPP_7268D }}' > /tmp/firebase-service-account.json
+          export GOOGLE_APPLICATION_CREDENTIALS=/tmp/firebase-service-account.json
+          
           SOURCE_CHANNEL="${{ github.event.inputs.rollback_to }}"
-          SOURCE_URL="https://${SOURCE_CHANNEL}--${{ env.FIREBASE_PROJECT_ID }}.web.app"
-
+          
+          # Obtenir l'URL réelle du canal source depuis Firebase
+          SOURCE_URL=$(firebase hosting:channel:list --project=${{ env.FIREBASE_PROJECT_ID }} | grep "$SOURCE_CHANNEL" | awk '{print $3}')
+          
           echo "source-url=${SOURCE_URL}" >> $GITHUB_OUTPUT
+          echo "Source channel URL: ${SOURCE_URL}"
 
           # Vérifier que le canal source est accessible
           if curl -f -s "${SOURCE_URL}" > /dev/null; then
@@ -81,13 +91,16 @@ jobs:
         run: flutter build web --release
 
       - name: Emergency deploy to live
-        uses: FirebaseExtended/action-hosting-deploy@v0
-        with:
-          repoToken: ${{ secrets.GITHUB_TOKEN }}
-          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_ECOMMERCEAPP_7268D }}
-          channelId: live
-          projectId: ${{ env.FIREBASE_PROJECT_ID }}
-          target: live
+        run: |
+          # Installer Firebase CLI
+          npm install -g firebase-tools
+          
+          # Configurer l'authentification Firebase
+          echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_ECOMMERCEAPP_7268D }}' > /tmp/firebase-service-account.json
+          export GOOGLE_APPLICATION_CREDENTIALS=/tmp/firebase-service-account.json
+          
+          # Déployer sur le canal live
+          firebase hosting:channel:deploy live --project=${{ env.FIREBASE_PROJECT_ID }}
 
       - name: Verify rollback
         run: |
