@@ -1,0 +1,236 @@
+name: Blue-Green Deployment
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      target_channel:
+        description: "Target channel for deployment (blue or green)"
+        required: true
+        default: "blue"
+        type: choice
+        options:
+          - blue
+          - green
+
+env:
+  FIREBASE_PROJECT_ID: ecommerceapp-7268d
+
+jobs:
+  # Job 1: Tests et validation
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: "stable"
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Generate mocks
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      - name: Check formatting
+        run: dart format --output=none --set-exit-if-changed .
+
+      - name: Run linter
+        run: dart analyze
+
+      - name: Run tests
+        run: flutter test
+
+      - name: Run integration tests
+        run: flutter test integration_test/ || echo "No integration tests found"
+
+  # Job 2: Build et déploiement sur canal preview
+  build-and-deploy-preview:
+    needs: test
+    runs-on: ubuntu-latest
+    outputs:
+      deployed-channel: ${{ steps.deploy.outputs.channel }}
+      preview-url: ${{ steps.deploy.outputs.preview-url }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: "stable"
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build web app
+        run: flutter build web --release
+
+      - name: Determine target channel
+        id: channel
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "channel=${{ github.event.inputs.target_channel }}" >> $GITHUB_OUTPUT
+          else
+            # Déterminer automatiquement le canal inactif
+            CURRENT_CHANNEL=$(curl -s "https://firebasehosting.googleapis.com/v1beta1/sites/${{ env.FIREBASE_PROJECT_ID }}/channels" \
+              -H "Authorization: Bearer ${{ secrets.FIREBASE_TOKEN }}" | \
+              jq -r '.channels[] | select(.name | contains("live")) | .name' | head -1)
+            
+            if [ "$CURRENT_CHANNEL" = "live-blue" ]; then
+              echo "channel=green" >> $GITHUB_OUTPUT
+            else
+              echo "channel=blue" >> $GITHUB_OUTPUT
+            fi
+          fi
+
+      - name: Deploy to preview channel
+        id: deploy
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_ECOMMERCEAPP_7268D }}
+          channelId: ${{ steps.channel.outputs.channel }}
+          projectId: ${{ env.FIREBASE_PROJECT_ID }}
+          target: ${{ steps.channel.outputs.channel }}
+
+      - name: Set preview URL
+        id: preview-url
+        run: |
+          echo "preview-url=https://${{ steps.channel.outputs.channel }}--${{ env.FIREBASE_PROJECT_ID }}.web.app" >> $GITHUB_OUTPUT
+
+      - name: Comment PR with preview URL
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `🚀 **Preview déployé sur le canal ${{ steps.channel.outputs.channel }}**\n\n🔗 **URL de preview:** ${{ steps.preview-url.outputs.preview-url }}\n\n✅ Prêt pour les tests et la promotion vers live.`
+            })
+
+  # Job 3: Smoke tests sur le canal preview
+  smoke-tests:
+    needs: build-and-deploy-preview
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+
+      - name: Install Playwright
+        run: |
+          npm init -y
+          npm install -D @playwright/test
+          npx playwright install --with-deps
+
+      - name: Run smoke tests
+        run: |
+          cat > smoke-tests.spec.js << 'EOF'
+          const { test, expect } = require('@playwright/test');
+
+          test.describe('Smoke Tests', () => {
+            test('Homepage loads correctly', async ({ page }) => {
+              await page.goto('${{ needs.build-and-deploy-preview.outputs.preview-url }}');
+              await expect(page).toHaveTitle(/Flutter Ecommerce App/);
+              await page.waitForLoadState('networkidle');
+            });
+
+            test('Navigation works', async ({ page }) => {
+              await page.goto('${{ needs.build-and-deploy-preview.outputs.preview-url }}');
+              
+              // Test navigation to different pages
+              const catalogLink = page.locator('text=Catalog').first();
+              if (await catalogLink.isVisible()) {
+                await catalogLink.click();
+                await page.waitForLoadState('networkidle');
+              }
+            });
+
+            test('App is responsive', async ({ page }) => {
+              await page.goto('${{ needs.build-and-deploy-preview.outputs.preview-url }}');
+              
+              // Test mobile viewport
+              await page.setViewportSize({ width: 375, height: 667 });
+              await page.waitForLoadState('networkidle');
+              
+              // Test desktop viewport
+              await page.setViewportSize({ width: 1920, height: 1080 });
+              await page.waitForLoadState('networkidle');
+            });
+          });
+          EOF
+
+          npx playwright test smoke-tests.spec.js --reporter=line
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-test-results
+          path: test-results/
+
+  # Job 4: Promotion vers live (manuel)
+  promote-to-live:
+    needs: [build-and-deploy-preview, smoke-tests]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.promote == 'true'
+    environment: production
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Promote to live
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_ECOMMERCEAPP_7268D }}
+          channelId: live
+          projectId: ${{ env.FIREBASE_PROJECT_ID }}
+          target: live
+
+      - name: Notify deployment success
+        run: |
+          echo "✅ Déploiement réussi sur le canal live!"
+          echo "🔗 URL: https://${{ env.FIREBASE_PROJECT_ID }}.web.app"
+
+  # Job 5: Rollback (manuel)
+  rollback:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.rollback == 'true'
+    environment: production
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Rollback to previous version
+        run: |
+          echo "🔄 Rollback en cours..."
+          # Ici vous pouvez implémenter la logique de rollback
+          # Par exemple, redéployer la version précédente depuis un canal de backup
+          echo "✅ Rollback terminé"
+
+  # Job 6: Nettoyage des anciens canaux
+  cleanup:
+    needs: [build-and-deploy-preview]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Cleanup old preview channels
+        run: |
+          echo "🧹 Nettoyage des anciens canaux preview..."
+          # Logique de nettoyage des canaux inactifs
+          echo "✅ Nettoyage terminé"

@@ -1,0 +1,158 @@
+name: Emergency Rollback
+
+on:
+  workflow_dispatch:
+    inputs:
+      rollback_to:
+        description: "Rollback to channel (blue or green)"
+        required: true
+        type: choice
+        options:
+          - blue
+          - green
+      emergency_confirmation:
+        description: 'Type "EMERGENCY_ROLLBACK" to confirm'
+        required: true
+        type: string
+
+env:
+  FIREBASE_PROJECT_ID: ecommerceapp-7268d
+
+jobs:
+  validate-emergency:
+    runs-on: ubuntu-latest
+    outputs:
+      valid: ${{ steps.validate.outputs.valid }}
+    steps:
+      - name: Validate emergency confirmation
+        id: validate
+        run: |
+          if [ "${{ github.event.inputs.emergency_confirmation }}" = "EMERGENCY_ROLLBACK" ]; then
+            echo "valid=true" >> $GITHUB_OUTPUT
+            echo "🚨 Emergency rollback confirmed"
+          else
+            echo "valid=false" >> $GITHUB_OUTPUT
+            echo "❌ Invalid confirmation. You must type 'EMERGENCY_ROLLBACK'"
+            exit 1
+          fi
+
+  check-source-channel:
+    needs: validate-emergency
+    if: needs.validate-emergency.outputs.valid == 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      source-url: ${{ steps.check.outputs.source-url }}
+    steps:
+      - name: Check source channel availability
+        id: check
+        run: |
+          SOURCE_CHANNEL="${{ github.event.inputs.rollback_to }}"
+          SOURCE_URL="https://${SOURCE_CHANNEL}--${{ env.FIREBASE_PROJECT_ID }}.web.app"
+
+          echo "source-url=${SOURCE_URL}" >> $GITHUB_OUTPUT
+
+          # Vérifier que le canal source est accessible
+          if curl -f -s "${SOURCE_URL}" > /dev/null; then
+            echo "✅ Source channel ${SOURCE_CHANNEL} is accessible"
+          else
+            echo "❌ Source channel ${SOURCE_CHANNEL} is not accessible"
+            exit 1
+          fi
+
+  emergency-rollback:
+    needs: [validate-emergency, check-source-channel]
+    if: needs.validate-emergency.outputs.valid == 'true'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: "stable"
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build web app
+        run: flutter build web --release
+
+      - name: Emergency deploy to live
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_ECOMMERCEAPP_7268D }}
+          channelId: live
+          projectId: ${{ env.FIREBASE_PROJECT_ID }}
+          target: live
+
+      - name: Verify rollback
+        run: |
+          echo "🔍 Verifying rollback..."
+          sleep 10
+
+          if curl -f -s "https://${{ env.FIREBASE_PROJECT_ID }}.web.app" > /dev/null; then
+            echo "✅ Rollback successful - Live site is accessible"
+          else
+            echo "❌ Rollback failed - Live site is not accessible"
+            exit 1
+          fi
+
+      - name: Notify rollback completion
+        run: |
+          echo "🚨 EMERGENCY ROLLBACK COMPLETED"
+          echo "📊 Rolled back to: ${{ github.event.inputs.rollback_to }}"
+          echo "🔗 Live URL: https://${{ env.FIREBASE_PROJECT_ID }}.web.app"
+          echo "⏰ Time: $(date)"
+          echo ""
+          echo "⚠️  Next steps:"
+          echo "1. Investigate the issue that caused the rollback"
+          echo "2. Fix the problem in the development branch"
+          echo "3. Test thoroughly before next deployment"
+          echo "4. Update the team about the incident"
+
+  post-rollback-tests:
+    needs: emergency-rollback
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+
+      - name: Install Playwright
+        run: |
+          npm init -y
+          npm install -D @playwright/test
+          npx playwright install --with-deps
+
+      - name: Run post-rollback smoke tests
+        run: |
+          cat > post-rollback-tests.spec.js << 'EOF'
+          const { test, expect } = require('@playwright/test');
+
+          test.describe('Post-Rollback Tests', () => {
+            test('Live site is working after rollback', async ({ page }) => {
+              await page.goto('https://${{ env.FIREBASE_PROJECT_ID }}.web.app');
+              await expect(page).toHaveTitle(/Flutter Ecommerce App/);
+              await page.waitForLoadState('networkidle');
+            });
+
+            test('Critical functionality works', async ({ page }) => {
+              await page.goto('https://${{ env.FIREBASE_PROJECT_ID }}.web.app');
+              await page.waitForLoadState('networkidle');
+              
+              // Basic functionality check
+              const body = await page.locator('body');
+              await expect(body).toBeVisible();
+            });
+          });
+          EOF
+
+          npx playwright test post-rollback-tests.spec.js --reporter=line

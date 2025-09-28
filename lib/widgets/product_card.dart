@@ -7,11 +7,7 @@ class ProductCard extends StatelessWidget {
   final Product product;
   final VoidCallback? onTap;
 
-  const ProductCard({
-    super.key,
-    required this.product,
-    this.onTap,
-  });
+  const ProductCard({super.key, required this.product, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -107,11 +103,7 @@ class ProductCard extends StatelessWidget {
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(
-                            Icons.star,
-                            color: Colors.amber,
-                            size: 14,
-                          ),
+                          const Icon(Icons.star, color: Colors.amber, size: 14),
                           const SizedBox(width: 2),
                           Text(
                             product.rating.rate.toString(),
@@ -138,14 +130,18 @@ class ProductCard extends StatelessWidget {
                             cart.addToCart(product);
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text('${product.title} ajouté au panier'),
+                                content: Text(
+                                  '${product.title} ajouté au panier',
+                                ),
                                 backgroundColor: Colors.green,
                                 duration: const Duration(seconds: 2),
                               ),
                             );
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: isInCart ? Colors.green : Colors.blue,
+                            backgroundColor: isInCart
+                                ? Colors.green
+                                : Colors.blue,
                             foregroundColor: Colors.white,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
