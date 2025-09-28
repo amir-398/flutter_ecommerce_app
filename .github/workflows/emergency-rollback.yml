@@ -48,16 +48,16 @@ jobs:
         run: |
           # Installer Firebase CLI
           npm install -g firebase-tools
-          
+
           # Configurer l'authentification Firebase
           echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_ECOMMERCEAPP_7268D }}' > /tmp/firebase-service-account.json
           export GOOGLE_APPLICATION_CREDENTIALS=/tmp/firebase-service-account.json
-          
+
           SOURCE_CHANNEL="${{ github.event.inputs.rollback_to }}"
-          
+
           # Obtenir l'URL réelle du canal source depuis Firebase
-          SOURCE_URL=$(firebase hosting:channel:list --project=${{ env.FIREBASE_PROJECT_ID }} | grep "$SOURCE_CHANNEL" | awk '{print $3}')
-          
+          SOURCE_URL=$(firebase hosting:channel:list --project=${{ env.FIREBASE_PROJECT_ID }} | grep "$SOURCE_CHANNEL" | sed 's/.*│ *\(https[^│]*\) *│.*/\1/')
+
           echo "source-url=${SOURCE_URL}" >> $GITHUB_OUTPUT
           echo "Source channel URL: ${SOURCE_URL}"
 
@@ -94,11 +94,11 @@ jobs:
         run: |
           # Installer Firebase CLI
           npm install -g firebase-tools
-          
+
           # Configurer l'authentification Firebase
           echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_ECOMMERCEAPP_7268D }}' > /tmp/firebase-service-account.json
           export GOOGLE_APPLICATION_CREDENTIALS=/tmp/firebase-service-account.json
-          
+
           # Déployer sur le canal live
           firebase hosting:channel:deploy live --project=${{ env.FIREBASE_PROJECT_ID }}
 

@@ -66,7 +66,7 @@ jobs:
           export GOOGLE_APPLICATION_CREDENTIALS=/tmp/firebase-service-account.json
 
           # Obtenir l'URL réelle du canal source depuis Firebase
-          SOURCE_URL=$(firebase hosting:channel:list --project=${{ env.FIREBASE_PROJECT_ID }} | grep "${{ github.event.inputs.source_channel }}" | awk '{print $3}')
+          SOURCE_URL=$(firebase hosting:channel:list --project=${{ env.FIREBASE_PROJECT_ID }} | grep "${{ github.event.inputs.source_channel }}" | sed 's/.*│ *\(https[^│]*\) *│.*/\1/')
           echo "source-url=$SOURCE_URL" >> $GITHUB_OUTPUT
           echo "Source channel URL: $SOURCE_URL"
 

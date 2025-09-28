@@ -55,8 +55,8 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     outputs:
-      deployed-channel: ${{ steps.deploy.outputs.channel }}
-      preview-url: ${{ steps.deploy.outputs.preview-url }}
+      deployed-channel: ${{ steps.channel.outputs.channel }}
+      preview-url: ${{ steps.preview-url.outputs.preview-url }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -105,7 +105,7 @@ jobs:
           firebase hosting:channel:deploy ${{ steps.channel.outputs.channel }} --project=${{ env.FIREBASE_PROJECT_ID }}
           
           # Obtenir l'URL du canal déployé
-          CHANNEL_URL=$(firebase hosting:channel:list --project=${{ env.FIREBASE_PROJECT_ID }} | grep "${{ steps.channel.outputs.channel }}" | awk '{print $3}')
+          CHANNEL_URL=$(firebase hosting:channel:list --project=${{ env.FIREBASE_PROJECT_ID }} | grep "${{ steps.channel.outputs.channel }}" | sed 's/.*│ *\(https[^│]*\) *│.*/\1/')
           echo "deployed-url=$CHANNEL_URL" >> $GITHUB_OUTPUT
           echo "Deployed to: $CHANNEL_URL"
 
