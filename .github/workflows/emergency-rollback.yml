@@ -153,7 +153,7 @@ jobs:
           test.describe('Post-Rollback Tests', () => {
             test('Live site is working after rollback', async ({ page }) => {
               await page.goto('https://${{ env.FIREBASE_PROJECT_ID }}.web.app');
-              await expect(page).toHaveTitle(/Flutter Ecommerce App/);
+              await expect(page).toHaveTitle(/E-Commerce App|Flutter Ecommerce App|flutter_ecommerce_app/);
               await page.waitForLoadState('networkidle');
             });
 

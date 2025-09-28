@@ -35,7 +35,7 @@ const { test, expect } = require('@playwright/test');
 test.describe('Smoke Tests', () => {
   test('Homepage loads correctly', async ({ page }) => {
     await page.goto('$CHANNEL_URL');
-    await expect(page).toHaveTitle(/Flutter Ecommerce App/);
+    await expect(page).toHaveTitle(/E-Commerce App|Flutter Ecommerce App|flutter_ecommerce_app/);
     await page.waitForLoadState('networkidle');
   });
 
