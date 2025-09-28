@@ -157,8 +157,8 @@ jobs:
           echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_ECOMMERCEAPP_7268D }}' > /tmp/firebase-service-account.json
           export GOOGLE_APPLICATION_CREDENTIALS=/tmp/firebase-service-account.json
 
-          # Déployer sur le canal live
-          firebase hosting:channel:deploy live --project=${{ env.FIREBASE_PROJECT_ID }}
+          # Déployer sur le canal live (utiliser firebase deploy pour live)
+          firebase deploy --only hosting --project=${{ env.FIREBASE_PROJECT_ID }}
 
       - name: Verify live deployment
         run: |
